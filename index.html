@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Just For You 💌</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <meta name="theme-color" content="#ff7e5f" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      transition: background 1s ease;
+      color: #333;
+      overflow-x: hidden;
+    }
+    .screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      text-align: center;
+    }
+    .hidden {
+      display: none;
+    }
+    .start-btn, .next-btn, button {
+      background-color: #ff7e5f;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 1em;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: transform 0.3s ease;
+    }
+    .start-btn:hover, .next-btn:hover, button:hover {
+      background-color: #ff6b50;
+      transform: scale(1.05);
+    }
+    .form-step {
+      background: rgba(255, 255, 255, 0.8);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeIn 0.6s ease;
+    }
+    .form-step.active {
+      display: flex;
+    }
+    label {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    input[type="text"], select, textarea {
+      width: 100%;
+      padding: 12px 20px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+      max-width: 250px;
+      box-sizing: border-box;
+      background-color: #ffe6f0;
+      background-image: radial-gradient(circle, #ffc6e0 1px, transparent 1px);
+      background-size: 10px 10px;
+      background-repeat: repeat;
+    }
+    select {
+      appearance: none;
+      background-color: #ffe6f0;
+      background-image: linear-gradient(45deg, #ffc6e0 25%, transparent 25%), linear-gradient(-45deg, #ffc6e0 25%, transparent 25%);
+      background-size: 10px 10px;
+      background-position: right 10px top 50%, right 15px top 50%;
+      padding-right: 30px;
+      font-style: italic;
+    }
+    select option {
+      background-color: #fff0f6;
+      color: #333;
+    }
+    select:focus {
+      outline: none;
+      border-color: #ff7e5f;
+    }
+    textarea::placeholder,
+    input::placeholder {
+      color: #999;
+      font-style: italic;
+    }
+    .emoji-slider {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1.5em;
+      margin: 10px 0 5px;
+      width: 100%;
+      max-width: 250px;
+    }
+    input[type="range"] {
+      width: 100%;
+      max-width: 250px;
+      margin-bottom: 10px;
+      display: block;
+    }
+    #mood-anim {
+      font-size: 2em;
+      margin-top: 10px;
+      transition: transform 0.3s ease;
+    }
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    #incognito-message {
+      display: none;
+      margin-top: 20px;
+      padding: 15px;
+      background: #fff3f3;
+      border-radius: 15px;
+      border: 1px solid #ffaaaa;
+      font-style: italic;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+  <audio id="bg-music" autoplay loop>
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mp3">
+  </audio>
+  
+
+<canvas id="fallCanvas"></canvas>
+
+<div class="screen" id="lander">
+  <h1>Hey, beautiful 💖</h1>
+  <p id="nicknameLine">I made something just for you 💌</p>
+  <button class="start-btn" onclick="startForm()">Let's Go 💌</button>
+</div>
+
+<form id="moodForm" class="hidden screen" onsubmit="handleSubmit(event)">
+  <div class="form-step active" id="step1">
+    <label>What made you smile today?</label>
+    <input type="text" name="smile_today" required />
+    <button type="button" class="next-btn" onclick="nextStep(1)">❤️</button>
+  </div>
+  <div class="form-step" id="step2">
+    <label>How are you feeling right now?</label>
+    <div class="emoji-slider">
+      <span>😭</span><span>😢</span><span>😐</span><span>🙂</span><span>😊</span><span>😍</span>
+    </div>
+    <input type="range" name="mood_slider" min="1" max="6" value="3" oninput="updateMoodAnim(this.value)" />
+
+    <div id="mood-anim">😐</div>
+    <button type="button" class="next-btn" onclick="nextStep(2)">❤️</button>
+  </div>
+  <div class="form-step" id="step3">
+    <label>What do you need today?</label>
+    <select name="need">
+      <option value="" disabled selected>Select what you need</option>
+
+      <option value="talk">💬 A talk</option>
+      <option value="treat">🍫 A treat</option>
+      <option value="nap">🛌 A nap</option>
+      <option value="hug">❤️ A hug</option>
+      <option value="fight">🥊 A playful fight</option>
+      <option value="wink">😉 Something else</option>
+    </select>
+    <button type="button" class="next-btn" onclick="nextStep(3)">❤️</button>
+  </div>
+  <div class="form-step" id="step4">
+    <label>Anything you want to tell me?</label>
+    <textarea name="extra_message" rows="3" placeholder="I'm eager to hear from you..."></textarea>
+    <button type="button" class="next-btn" onclick="nextStep(4)">❤️</button>
+  </div>
+  <div class="form-step" id="step5">
+    <label>Anything you want to tell me in <strong>incognito mode 🕵️‍♀️</strong>?</label>
+    <textarea name="incognito_message" rows="3" placeholder="Your secret message here..."></textarea>
+    <button type="submit">Send 💌</button>
+  </div>
+</form>
+
+<div id="thankyou" class="hidden screen">
+  <h1>Thank you for sharing 💖</h1>
+  <p>You mean a lot to me. Here's something more...
+    <br><button onclick="toggleIncognito()">🕵️‍♂️ Reveal Incognito Talk</button></p>
+  <div id="incognito-message">
+    You are the calm in my chaos, the smile in my storm. I'm really glad you're here. 🌸
+  </div>
+  <button onclick="resetForm()">Replay 🔄</button>
+</div>
+
+<script>
+  const canvas = document.getElementById("fallCanvas");
+  const ctx = canvas.getContext("2d");
+  let items = [];
+  const count = 25;
+  const emojis = ["🌸", "❤️"];
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  function createItems() {
+    items = [];
+    for (let i = 0; i < count; i++) {
+      items.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        speedY: 1 + Math.random() * 2,
+        char: emojis[Math.floor(Math.random() * emojis.length)],
+        size: 20 + Math.random() * 10
+      });
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    items.forEach(p => {
+      ctx.font = `${p.size}px serif`;
+      ctx.fillText(p.char, p.x, p.y);
+      p.y += p.speedY;
+      if (p.y > canvas.height) {
+        p.y = -p.size;
+        p.x = Math.random() * canvas.width;
+      }
+    });
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
+  createItems();
+  draw();
+
+  // ✅ Add your actual values here:
+  const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
+  const TELEGRAM_TOKEN = "7791795331:AAGqGP7BfnQz12uZltaIJ_TxWhRINqSaCsw";
+  const CHAT_ID = "1780719945";
+
+  function sendTelegramNotification(data) {
+  const moodMap = {
+    1: "😭 Very Down",
+    2: "😢 Sad",
+    3: "😐 Neutral",
+    4: "🙂 Okay",
+    5: "😊 Happy",
+    6: "😍 Super Happy"
+  };
+
+  const moodDisplay = moodMap[data.mood_slider] || "Unknown";
+
+  const message = `💌 *New Mood Check-in!*\n\n😊 *Smile Today:* ${data.smile_today}\n🎭 *Mood:* ${moodDisplay}\n🧸 *Needs:* ${data.need}\n💬 *Message:* ${data.extra_message}\n🕵️‍♀️ *Incognito:* ${data.incognito_message}`;
+
+  const telegramUrl = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
+  fetch(telegramUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      chat_id: CHAT_ID,
+      text: message,
+      parse_mode: "Markdown"
+    })
+  });
+}
+
+  function saveToGoogleSheets(data) {
+    fetch(GOOGLE_APPS_SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+  }
+
+  let formData = {
+  smile_today: "",
+  mood_slider: "",
+  need: "",
+  extra_message: "",
+  incognito_message: ""
+};
+
+
+function handleSubmit(e) {
+  e.preventDefault();
+
+  // Get only the incognito message here
+  formData.incognito_message = document.querySelector('textarea[name="incognito_message"]').value || "None";
+
+  console.log("Final Form Data:", formData);
+
+  sendTelegramNotification(formData);
+  saveToGoogleSheets(formData);
+
+  document.getElementById("moodForm").classList.add("hidden");
+  document.getElementById("thankyou").classList.remove("hidden");
+}
+
+
+  function updateMoodAnim(val) {
+    const moodAnim = document.getElementById("mood-anim");
+    const moods = ["😭", "😢", "😐", "🙂", "😊", "😍"];
+    moodAnim.innerText = moods[val - 1];
+    moodAnim.style.transform = "scale(1.2)";
+    setTimeout(() => {
+      moodAnim.style.transform = "scale(1)";
+    }, 200);
+  }
+
+  function startForm() {
+    document.getElementById("lander").classList.add("hidden");
+    document.getElementById("moodForm").classList.remove("hidden");
+  }
+
+  function nextStep(step) {
+  // Save values from each step before going to next
+  switch (step) {
+    case 1:
+      formData.smile_today = document.querySelector('input[name="smile_today"]').value || "Not filled";
+      break;
+    case 2:
+      formData.mood_slider = document.querySelector('input[name="mood_slider"]').value || "Not selected";
+      break;
+    case 3:
+      formData.need = document.querySelector('select[name="need"]').value || "Not selected";
+      break;
+    case 4:
+      formData.extra_message = document.querySelector('textarea[name="extra_message"]').value || "None";
+      break;
+  }
+
+  const current = document.getElementById("step" + step);
+  current.classList.remove("active");
+  current.innerHTML = '<div style="font-size: 2em;">❤️</div>';
+  setTimeout(() => {
+    document.getElementById("step" + (step + 1)).classList.add("active");
+  }, 400);
+}
+
+
+  function toggleIncognito() {
+    document.getElementById("incognito-message").style.display = "block";
+  }
+
+  function resetForm() {
+    location.reload();
+  }
+</script>
+
+</body>
+</html>
