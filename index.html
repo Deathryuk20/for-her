@@ -325,9 +325,16 @@ function handleSubmit(e) {
   }
 
   function startForm() {
-    document.getElementById("lander").classList.add("hidden");
-    document.getElementById("moodForm").classList.remove("hidden");
+  document.getElementById("lander").classList.add("hidden");
+  document.getElementById("moodForm").classList.remove("hidden");
+
+  // Play music
+  const bgMusic = document.getElementById("bg-music");
+  if (bgMusic.paused) {
+    bgMusic.play().catch(err => console.log("Autoplay failed:", err));
   }
+}
+
 
   function nextStep(step) {
   // Save values from each step before going to next
