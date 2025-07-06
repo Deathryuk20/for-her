@@ -328,12 +328,14 @@ function handleSubmit(e) {
   document.getElementById("lander").classList.add("hidden");
   document.getElementById("moodForm").classList.remove("hidden");
 
-  // Play music
+  // Play music at low volume
   const bgMusic = document.getElementById("bg-music");
+  bgMusic.volume = 0.5; // 50% volume
   if (bgMusic.paused) {
     bgMusic.play().catch(err => console.log("Autoplay failed:", err));
   }
 }
+
 
 
   function nextStep(step) {
