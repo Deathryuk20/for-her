@@ -360,6 +360,18 @@ function handleSubmit(e) {
   function resetForm() {
     location.reload();
   }
+  // Random nickname message generator
+function setRandomNickname() {
+  const nicknames = [
+    "My Baby girl", "My Bumblebee (Bumblebeebat)", "My cutie pie", "My sweetheart", "Rani Sahiba", "Chudail ji", "My caramel"];
+
+  const randomNick = nicknames[Math.floor(Math.random() * nicknames.length)];
+  document.getElementById("nicknameLine").innerText = `I made something just for you, ${randomNick} 💌`;
+}
+
+// Call on load
+setRandomNickname();
+
 </script>
 
 </body>
